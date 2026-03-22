@@ -1,0 +1,28 @@
+services:
+
+  db:
+    image: mariadb:10.5
+    container_name: farmacia_db
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: farmacia_app
+    ports:
+      - "3307:3306"
+    volumes:
+      - ./farmacia.sql:/docker-entrypoint-initdb.d/farmacia.sql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-proot"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  backend:
+    build: .
+    container_name: farmacia_api
+    restart: always
+    ports:
+      - "3000:3000"
+    depends_on:
+      db:
+        condition: service_healthy
